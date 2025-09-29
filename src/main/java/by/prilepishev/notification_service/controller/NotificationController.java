@@ -1,5 +1,6 @@
 package by.prilepishev.notification_service.controller;
 
+import by.prilepishev.notification_service.service.NotificationManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class NotificationController {
     }
 
     @PostMapping("/sms")
-    public ResponseEntity<Map<String, String>> sendEmailNotification(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, String>> sendSmsNotification(@RequestBody Map<String, String> request) {
         String message = request.get("message");
         notificationManagerService.sendSmsNotification(message);
 
@@ -45,7 +46,7 @@ public class NotificationController {
     }
 
     @PostMapping("/push")
-    public ResponseEntity<Map<String, String>> sendEmailNotification(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, String>> sendPushNotification(@RequestBody Map<String, String> request) {
         String message = request.get("message");
         notificationManagerService.sendPushNotification(message);
 
@@ -60,7 +61,7 @@ public class NotificationController {
     @PostMapping("/all")
     public ResponseEntity<Map<String, String>> sendAllNotification(@RequestBody Map<String, String> request) {
         String message = request.get("message");
-        notificationManagerService.sendAllNotification(message);
+        notificationManagerService.sendNotificationToAll(message);
 
         Map<String, String> response = new HashMap<>();
         response.put("status", "success");
@@ -71,12 +72,12 @@ public class NotificationController {
     }
 
     @PostMapping("/by-type/{serviceType}")
-    public ResponseEntity<Map<String, String>> sendAllNotification(
+    public ResponseEntity<Map<String, String>> sendNotificationByType(
             @PathVariable String serviceType,
             @RequestBody Map<String, String> request) {
 
         String message = request.get("message");
-        notificationManagerService.sendNotificationByType(message);
+        notificationManagerService.sendNotificationByType(serviceType, message);
 
         Map<String, String> response = new HashMap<>();
         response.put("status", "success");
