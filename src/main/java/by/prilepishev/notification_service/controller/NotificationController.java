@@ -4,6 +4,7 @@ import by.prilepishev.notification_service.service.NotificationManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import by.prilepishev.notification_service.dto.FarmResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,11 @@ public class NotificationController {
     @Autowired
     public NotificationController(NotificationManagerService notificationManagerService) {
         this.notificationManagerService = notificationManagerService;
+    }
+
+    @PostMapping("/create-farm")
+    public FarmResponse createFarm(@RequestBody Map<String, String> request) {
+        return notificationManagerService.createFarmAndNotify(request);
     }
 
     @PostMapping("/email")

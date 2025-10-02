@@ -1,5 +1,8 @@
 package by.prilepishev.notification_service.service;
 
+import by.prilepishev.notification_service.client.FarmApiClient;
+import by.prilepishev.notification_service.dto.FarmRequest;
+import by.prilepishev.notification_service.dto.FarmResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -15,6 +18,7 @@ public class NotificationManagerService {
       private final NotificationServiceInterface pushService;
       private final List<NotificationServiceInterface> allNotificationService;
       private final Map<String, NotificationServiceInterface> notificationServiceMap;
+      private final FarmApiClient farmApiClient;
 
     @Autowired
     public NotificationManagerService(
@@ -22,13 +26,15 @@ public class NotificationManagerService {
             @Qualifier("smsNotificationService") NotificationServiceInterface smsService,
             @Qualifier("pushNotificationService") NotificationServiceInterface pushService,
             List<NotificationServiceInterface> allNotificationService,
-            Map<String, NotificationServiceInterface> notificationServiceMap) {
+            Map<String, NotificationServiceInterface> notificationServiceMap,
+            FarmApiClient farmApiClient) {
 
         this.emailService = emailService;
         this.smsService = smsService;
         this.pushService = pushService;
         this.allNotificationService = allNotificationService;
         this.notificationServiceMap = notificationServiceMap;
+        this.farmApiClient = farmApiClient;
     }
 
     public void sendEmailNotification(String message) {
@@ -41,6 +47,22 @@ public class NotificationManagerService {
 
     public void sendPushNotification(String message) {
         pushService.sendNotification(message);
+    }
+
+    public FarmResponse createFarmAndNotify(Map<String, String> request) {
+        try {
+            FarmRequest farmRequest = new FarmRequest();
+            farmRequest.setName(request.get("name"));
+            farmRequest.setLocation(request.get("location"));
+
+            FarmResponse farmResponse = farmApiClient.createForm(farmRequest);
+
+            sendNotificationToAll("Farm is created!");
+            return farmResponse;
+        } catch (Exception e) {
+            System.err.println("Error during farm creation and notification: " + e.getMessage());
+            return null;
+        }
     }
 
     public void sendNotificationToAll(String message) {
