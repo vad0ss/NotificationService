@@ -1,5 +1,6 @@
 package by.prilepishev.notification_service.controller;
 
+import by.prilepishev.notification_service.dto.FruitResponse;
 import by.prilepishev.notification_service.service.NotificationManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +22,35 @@ public class NotificationController {
     }
 
     @PostMapping("/create-farm")
-    public FarmResponse createFarm(@RequestBody Map<String, String> request) {
-        return notificationManagerService.createFarmAndNotify(request);
+    public ResponseEntity<Map<String, Object>> createFarm(@RequestBody Map<String, String> request) {
+        FarmResponse farmResponse = notificationManagerService.createFarmAndNotify(request);
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            response.put("status", "success");
+            response.put("message", "Farm created");
+            response.put("farm", farmResponse);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping("/create-fruits")
+    public ResponseEntity<Map<String, Object>> createFruits(@RequestBody Map<String, String> request) {
+        FruitResponse fruitResponse = notificationManagerService.createFruitAndNotify(request);
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            response.put("status", "success");
+            response.put("message", "Fruits created");
+            response.put("farm", fruitResponse);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @PostMapping("/email")

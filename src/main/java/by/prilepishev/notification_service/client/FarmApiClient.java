@@ -2,6 +2,8 @@ package by.prilepishev.notification_service.client;
 
 import by.prilepishev.notification_service.dto.FarmRequest;
 import by.prilepishev.notification_service.dto.FarmResponse;
+import by.prilepishev.notification_service.dto.FruitRequest;
+import by.prilepishev.notification_service.dto.FruitResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -19,7 +21,7 @@ public class FarmApiClient {
         this.restTemplate = restTemplate;
     }
 
-    public FarmResponse createForm(FarmRequest farmRequest) {
+    public FarmResponse createFarm(FarmRequest farmRequest) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -40,6 +42,32 @@ public class FarmApiClient {
         } catch (Exception error) {
             System.err.println("Error creating farm: " + error.getMessage());
             throw new RuntimeException("Failed to create farm", error);
+        }
+    }
+
+    public FruitResponse createFruit(FruitRequest fruitRequest) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<FruitRequest> requestEntity = new HttpEntity<>(fruitRequest, headers);
+
+            String farmId = fruitRequest.getFarmId();
+
+            ResponseEntity<FruitResponse> response = restTemplate.exchange(
+                    farmApiBaseUrl + "/api/fruits/create-random-fruit/" + farmId,
+                    HttpMethod.POST,
+                    requestEntity,
+                    FruitResponse.class
+            );
+
+            FruitResponse fruitResponse = response.getBody();
+            System.out.println("Fruits created successfully: " + fruitResponse.getFarmId());
+            return fruitResponse;
+
+        } catch (Exception error) {
+            System.err.println("Error creating fruits: " + error.getMessage());
+            throw new RuntimeException("Failed to create fruits", error);
         }
     }
 

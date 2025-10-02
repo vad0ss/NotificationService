@@ -3,6 +3,8 @@ package by.prilepishev.notification_service.service;
 import by.prilepishev.notification_service.client.FarmApiClient;
 import by.prilepishev.notification_service.dto.FarmRequest;
 import by.prilepishev.notification_service.dto.FarmResponse;
+import by.prilepishev.notification_service.dto.FruitRequest;
+import by.prilepishev.notification_service.dto.FruitResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -13,12 +15,12 @@ import java.util.Map;
 @Service
 public class NotificationManagerService {
 
-      private final NotificationServiceInterface emailService;
-      private final NotificationServiceInterface smsService;
-      private final NotificationServiceInterface pushService;
-      private final List<NotificationServiceInterface> allNotificationService;
-      private final Map<String, NotificationServiceInterface> notificationServiceMap;
-      private final FarmApiClient farmApiClient;
+    private final NotificationServiceInterface emailService;
+    private final NotificationServiceInterface smsService;
+    private final NotificationServiceInterface pushService;
+    private final List<NotificationServiceInterface> allNotificationService;
+    private final Map<String, NotificationServiceInterface> notificationServiceMap;
+    private final FarmApiClient farmApiClient;
 
     @Autowired
     public NotificationManagerService(
@@ -50,25 +52,44 @@ public class NotificationManagerService {
     }
 
     public FarmResponse createFarmAndNotify(Map<String, String> request) {
-        try {
-            FarmRequest farmRequest = new FarmRequest();
-            farmRequest.setName(request.get("name"));
-            farmRequest.setLocation(request.get("location"));
+        System.out.println("Starting create farm!");
 
-            FarmResponse farmResponse = farmApiClient.createForm(farmRequest);
+        try {
+            String name = request.get("name");
+            String location = request.get("location");
+
+            FarmRequest farmRequest = new FarmRequest(name, location);
+            FarmResponse farmResponse = farmApiClient.createFarm(farmRequest);
 
             sendNotificationToAll("Farm is created!");
             return farmResponse;
         } catch (Exception e) {
-            System.err.println("Error during farm creation and notification: " + e.getMessage());
+            System.err.println("Error create farm creation and notification: " + e.getMessage());
             return null;
+        }
+    }
+
+    public FruitResponse createFruitAndNotify(Map<String, String> request) {
+        System.out.println("Starting create fruits!");
+
+        try {
+            String farmId = request.get("farmId");
+
+            FruitRequest fruitRequest = new FruitRequest(farmId);
+            FruitResponse fruitResponse = farmApiClient.createFruit(fruitRequest);
+
+            sendNotificationToAll("Fruit is created!");
+            return fruitResponse;
+        } catch (Exception e) {
+            System.err.println("Error create fruit creation and notification: " + e.getMessage());
+            throw new RuntimeException("Create fruit ");
         }
     }
 
     public void sendNotificationToAll(String message) {
         System.out.println("Send messages all types");
         allNotificationService.forEach(
-                service ->  {
+                service -> {
                     System.out.println("Service type: " + service.getServiceType());
                     service.sendNotification(message);
                 });
@@ -76,7 +97,7 @@ public class NotificationManagerService {
 
     public void sendNotificationByType(String serviceType, String message) {
         NotificationServiceInterface service = notificationServiceMap.get(serviceType);
-        if(service != null) {
+        if (service != null) {
             service.sendNotification(message);
         } else {
             System.out.println("Service type " + serviceType + " not found");
